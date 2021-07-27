@@ -6,7 +6,7 @@ const base = process.env.BASE_URL;
 
 app.get(`/${base}/`, (req, res) => {
     return res.json({code: 200, message: "operational"});
-});
+});     
 
 app.get(`/${base}/ServerList`, (req, res) => {
     const query = url.parse(req.url, true).query;
@@ -14,8 +14,10 @@ app.get(`/${base}/ServerList`, (req, res) => {
         axios.get(`https://api.steampowered.com/IGameServersService/GetServerList/v1/?filter=\\appid\\${query.appID}&key=${process.env.API_KEY}`)
             .then(function (response) {
                 if (response.status === 200) {
-                    let data = response.data.response.servers.map((server) => {
-                        return { ServerName: server.name, Map: server.map, CurrentPlayers: server.players, MaxPlayers: server.max_players, IPandPort: server.addr }
+                    let data = response.data.response.servers.map((server) => {   
+                        let serverAddr = server.addr.split(":");        
+                        let newServerAddr = `${serverAddr[0]}:${server.gameport}`;
+                        return { ServerName: server.name, Map: server.map, CurrentPlayers: server.players, MaxPlayers: server.max_players, IPandPort: newServerAddr, SteamID: server.steamid }
                     })
                     return res.json({ code: 200, data: data });
                 }
@@ -24,7 +26,7 @@ app.get(`/${base}/ServerList`, (req, res) => {
                 }
             })
             .catch(function (error) {
-                return res.json({code: 404, message: `AppID: "${query.appID}" not found`});
+                return res.json({code: 404, message: `AppID: "$ {query.appID}" not found`});
             });
     }
     else {
