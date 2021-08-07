@@ -8,18 +8,18 @@ app.get(`/${base}/`, (req, res) => {
     return res.json({code: 200, message: "operational"});
 });     
 
-app.get(`/${base}/ServerList`, (req, res) => {
+app.get(`/${base}/ServerList`, (req, res) => { // Returns the list of servers for a given appID from the steamAPI
     const query = url.parse(req.url, true).query;
     if (query !== null && query.appID !== undefined && query.appID !== "") {
         axios.get(`https://api.steampowered.com/IGameServersService/GetServerList/v1/?filter=\\appid\\${query.appID}&key=${process.env.API_KEY}`)
             .then(function (response) {
                 if (response.status === 200) {
+                    /* Server Map
                     let data = response.data.response.servers.map((server) => {   
-                        let serverAddr = server.addr.split(":");        
-                        let newServerAddr = `${serverAddr[0]}:${server.gameport}`;
-                        return { ServerName: server.name, Map: server.map, CurrentPlayers: server.players, MaxPlayers: server.max_players, IPandPort: newServerAddr, SteamID: server.steamid }
-                    })
-                    return res.json({ code: 200, data: data });
+                        let ipAddr = server.addr.split(":")[0];
+                        return { ServerName: server.name, Map: server.map, CurrentPlayers: server.players, MaxPlayers: server.max_players, IP: ipAddr, Port: server.gameport, SteamID: server.steamid, VAC: server.secure }
+                    });*/
+                    return res.json({ code: 200, data: response.data.response.servers });
                 }
                 else {
                     return res.json({ code: 500, message: "Internal server error" });
@@ -32,6 +32,10 @@ app.get(`/${base}/ServerList`, (req, res) => {
     else {
         return res.json({code: 400, message: "Bad Request"});
     }
+});
+
+app.get(`/${base}/ReturnIP`, (req, res) => { // Returns the IP of the user for use within the app to see which server is the user's in the browser
+    return res.json({ code: 200, data: req.headers['x-forwarded-for'] || req.socket.remoteAddress });
 });
 
 app.listen(3000);
