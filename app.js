@@ -27,7 +27,7 @@ app.get(`/${base}/ServerList`, (req, res) => { // Returns the list of servers fo
                 }
             })
             .catch(function (error) {
-                return res.json({code: 404, message: `AppID: "$ {query.appID}" not found`});
+                return res.json({code: 404, message: `AppID: "${query.appID}" not found`});
             });
     }
     else {
